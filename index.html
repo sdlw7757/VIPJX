@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>视频解析</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f2f5;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      h1 {
+        text-align: center;
+        color: #1a73e8;
+        margin-bottom: 30px;
+      }
+      .input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      input {
+        flex: 1;
+        min-width: 200px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        white-space: nowrap;
+      }
+      button:hover {
+        background-color: #1557b0;
+      }
+      .video-container {
+        margin-top: 20px;
+        width: 100%;
+        position: relative;
+        padding-top: 56.25%; /* 16:9 宽高比 */
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      select {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        background-color: white;
+      }
+      .note {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #e3f2fd;
+        border-radius: 4px;
+        color: #1565c0;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      .api-select {
+        margin-bottom: 20px;
+      }
+      @media (max-width: 600px) {
+        .input-group {
+          flex-direction: column;
+        }
+        input {
+          width: 100%;
+        }
+        button {
+          width: 100%;
+        }
+      }
+      #loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+        color: #1a73e8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>视频解析</h1>
+      <div class="input-group">
+        <input type="text" id="videoUrl" placeholder="请输入视频链接" />
+        <button onclick="parseVideo()">开始解析</button>
+      </div>
+      <div id="loading">正在解析中...</div>
+      <div class="video-container" id="videoContainer"></div>
+      <div class="note">
+        <strong>支持视频网站：</strong>爱奇艺、优酷、腾讯视频<br>
+        <strong>使用方法：</strong><br>
+        1. 复制视频网站的视频页面网址<br>
+        2. 粘贴到输入框中<br>
+        3. 点击"开始解析"即可观看<br>
+        <strong>示例链接格式：</strong><br>
+        - 爱奇艺：https://www.iqiyi.com/v_xxxxxxxx.html<br>
+        - 腾讯视频：https://v.qq.com/x/cover/xxxxxxxx.html<br>
+        - 优酷：https://v.youku.com/v_show/id_xxxxxxxx.html
+      </div>
+    </div>
+
+    <script>
+      async function parseVideo() {
+        const url = document.getElementById('videoUrl').value.trim();
+        if (!url) {
+          alert('请输入视频链接');
+          return;
+        }
+
+        const loading = document.getElementById('loading');
+        const videoContainer = document.getElementById('videoContainer');
+        loading.style.display = 'block';
+        videoContainer.innerHTML = '';
+
+        try {
+          // 直接使用 xmflv 的解析接口
+          const apiUrl = 'https://jx.xmflv.com/?url=' + encodeURIComponent(url);
+          videoContainer.innerHTML = `<iframe src="${apiUrl}" allowfullscreen frameborder="0"></iframe>`;
+        } catch (error) {
+          alert('解析失败，请检查链接是否正确');
+        } finally {
+          loading.style.display = 'none';
+        }
+      }
+
+      // 监听回车键
+      document.getElementById('videoUrl').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          parseVideo();
+        }
+      });
+
+      // 自动从剪贴板获取链接
+      document.getElementById('videoUrl').addEventListener('focus', async function() {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text.startsWith('http')) {
+            this.value = text;
+          }
+        } catch (err) {
+          // 忽略剪贴板访问错误
+        }
+      });
+    </script>
+  </body>
+</html> 
